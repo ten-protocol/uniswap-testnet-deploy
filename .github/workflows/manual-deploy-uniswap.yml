@@ -53,7 +53,7 @@ jobs:
         uses: 'azure/aci-deploy@v1'
         with:
           resource-group: ${{ secrets.RESOURCE_GROUP }}
-          dns-name-label: testnet-obscuroscan
+          dns-name-label: testnet-uniswap
           image: hub.docker.com/obscuronet/uniswap_testnet:latest
           name: testnet-uniswap
           location: 'uksouth'
