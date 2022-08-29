@@ -1,0 +1,66 @@
+# Deploys Uniswap on Azure for Testnet
+# Builds the Uniswap network image, pushes the image to dockerhub and starts the Uniswap on azure
+#
+# It exposes the following ports:
+# HTTP:       80,
+#
+# Exposes the following addresses: (only accessible internally)
+#  testnet-uniswap.uksouth.azurecontainer.io
+
+name: '[M] Deploy Uniswap'
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: obscuronet/uniswap_testnet:latest
+          file: ./Dockerfile
+
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+#      - name: 'Build and push image'
+#        uses: azure/docker-login@v1
+#        with:
+#          login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+#          username: ${{ secrets.REGISTRY_USERNAME }}
+#          password: ${{ secrets.REGISTRY_PASSWORD }}
+#      - run: |
+#          docker build -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/obscuronet/obscuro_testnet_obscuroscan:latest -f testnet/obscuroscan.Dockerfile  .
+#          docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/obscuronet/obscuro_testnet_obscuroscan:latest
+
+      - name: 'Deploy to Azure Container Instances'
+        uses: 'azure/aci-deploy@v1'
+        with:
+          resource-group: ${{ secrets.RESOURCE_GROUP }}
+          dns-name-label: testnet-obscuroscan
+          image: hub.docker.com/obscuronet/uniswap_testnet:latest
+          name: testnet-uniswap
+          location: 'uksouth'
+          restart-policy: 'Never'
+          command-line: ./deploy.sh
+          ports: '80'
+          cpu: 2
+          memory: 4
+
+
