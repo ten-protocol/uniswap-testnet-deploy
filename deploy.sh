@@ -7,6 +7,19 @@
 # Ensure any fail is loud and explicit
 set -euo pipefail
 
+help_and_exit() {
+    echo ""
+    echo "Usage: "
+    echo "   ex: (run locally)"
+    echo "      -  $(basename "${0}") "
+    echo ""
+    echo "  wallet_ext_host        *Optional* Sets host to which the WE connects to. Defaults to testnet"
+    echo ""
+    echo ""
+    echo ""
+    exit 1  # Exit with error explicitly
+}
+
 # Obscuro constants file is built on the fly
 obscuro_constants_file="/* eslint-disable */ \n"
 
@@ -14,13 +27,26 @@ obscuro_constants_file="/* eslint-disable */ \n"
 root_path="$(cd "$(dirname "${0}")" && pwd)"
 build_path="${root_path}/build"
 erc20_path="${root_path}/erc20deployer"
-connection_host=host.docker.internal
-http_connection_host="http://${connection_host}:3001/"
 wallet_ext_path="${build_path}/go-obscuro/tools/walletextension/main"
 uniswap_deployer_path="${build_path}/uniswap-deploy-v3"
 uniswap_sor_path="${build_path}/uniswap-smart-order-router"
 uniswap_interface_path="${build_path}/uniswap-interface"
+we_host="testnet.obscu.ro"
 
+
+# Fetch options
+for argument in "$@"
+do
+    key=$(echo $argument | cut -f1 -d=)
+    value=$(echo $argument | cut -f2 -d=)
+
+    case "$key" in
+            --we_host)                we_host=${value} ;;
+
+            --help)                     help_and_exit ;;
+            *)
+    esac
+done
 # create temp build path
 mkdir -p "${build_path}"
 
@@ -28,7 +54,7 @@ mkdir -p "${build_path}"
 cd "${build_path}"
 git clone -b main --single-branch https://github.com/obscuronet/go-obscuro
 cd "${wallet_ext_path}"
-nohup go build . && ./main -port 3001 -nodeHost ${connection_host}  &
+nohup go build . && ./main -port 3001 -nodeHost "${we_host}"  &
 sleep 30s
 echo "Waiting for Wallet Extension..."
 
