@@ -60,7 +60,7 @@ jobs:
           restart-policy: 'Never'
           command-line: tail -f /dev/null
           ports: '80'
-          cpu: 2
-          memory: 4
+          cpu: 4
+          memory: 16
 
 
