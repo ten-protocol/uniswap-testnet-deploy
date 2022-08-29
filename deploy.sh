@@ -54,7 +54,7 @@ mkdir -p "${build_path}"
 cd "${build_path}"
 git clone -b main --single-branch https://github.com/obscuronet/go-obscuro
 cd "${wallet_ext_path}"
-nohup go build . && ./main -port 3001 -nodeHost "${we_host}"  &
+go build . && ./main -port 3001 -nodeHost "${we_host}"  &
 sleep 30s
 echo "Waiting for Wallet Extension..."
 
