@@ -13,7 +13,7 @@ help_and_exit() {
     echo "   ex: (run locally)"
     echo "      -  $(basename "${0}") "
     echo ""
-    echo "  wallet_ext_host        *Optional* Sets host to which the WE connects to. Defaults to testnet"
+    echo "  we_host        *Optional* Sets host to which the WE connects to. Defaults to testnet"
     echo ""
     echo ""
     echo ""
@@ -31,7 +31,7 @@ wallet_ext_path="${build_path}/go-obscuro/tools/walletextension/main"
 uniswap_deployer_path="${build_path}/uniswap-deploy-v3"
 uniswap_sor_path="${build_path}/uniswap-smart-order-router"
 uniswap_interface_path="${build_path}/uniswap-interface"
-we_host="testnet.obscu.ro"
+we_host="testnet.obscu.ro" # host.docker.internal for docker instances connecting back to localhost
 
 
 # Fetch options
@@ -98,7 +98,7 @@ echo -e "${obscuro_constants_file}" > src/obscuro_constants_1.ts
 cat src/obscuro_constants.ts |tail -n+4>> src/obscuro_constants_1.ts
 mv src/obscuro_constants_1.ts src/obscuro_constants.ts
 cp -f "${uniswap_sor_path}/uniswap-smart-order-router-2.9.3.tgz" .
-yarn && yarn start
+yarn && yarn build && serve -s build -l 80
 
 
 

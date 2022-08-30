@@ -8,7 +8,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
     && apt-get -y install nodejs
 
 RUN ln -s /usr/lib/go-1.17/bin/* /usr/bin/
-RUN npm install -g yarn
+RUN npm install -g yarn serve
 RUN mkdir -p /uniswap
 WORKDIR /uniswap
 COPY . .

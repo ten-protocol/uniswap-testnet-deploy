@@ -58,7 +58,7 @@ jobs:
           name: testnet-uniswap
           location: 'uksouth'
           restart-policy: 'Never'
-          command-line: ./deploy.sh
+          command-line:  tail -f /dev/null #./deploy.sh
           ports: '80'
           cpu: 4
           memory: 16
