@@ -5,7 +5,13 @@ const {expect} = require("chai");
 const fs = require("fs");
 
 async function main() {
-  const [owner] = await ethers.getSigners();
+  console.log(process.argv);
+  let owner = {}
+  if (process.argv.length == 2) {
+    owner = await ethers.getSigners();
+  } else {
+    owner = new ethers.Wallet( process.argv[2], ethers.provider);
+  }
 
   const walletSetup = await setupWalletExtention(owner)
 

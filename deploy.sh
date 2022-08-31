@@ -80,7 +80,7 @@ echo ""
 
 # deploy the erc20contracts
 cd "${erc20_path}"
-yarn && npx hardhat compile && node scripts/deploy.js
+yarn && npx hardhat compile && node scripts/deploy.js "${pk_string}"
 erc20_state=$(cat state.json)
 obscuro_constants_file+="export const erc20state =${erc20_state}\n"
 echo "${erc20_state}"
