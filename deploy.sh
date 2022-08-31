@@ -10,10 +10,16 @@ set -euo pipefail
 help_and_exit() {
     echo ""
     echo "Usage: "
-    echo "   ex: (run locally)"
+    echo "   ex: (run locally) --we_host=host.docker.internal --faucet_addr=host.docker.internal"
     echo "      -  $(basename "${0}") "
     echo ""
-    echo "  we_host        *Optional* Sets host to which the WE connects to. Defaults to testnet"
+    echo "  we_host         *Optional* Sets host to which the WE connects to. Defaults to testnet"
+    echo ""
+    echo "  pk_string       *Optional* Sets the private key to deploy contracts. Defaults to 0x8dfb8083da6275ae3e4f41e3e8a8c19d028d32c9247e24530933782f2a05035b"
+    echo ""
+    echo "  addr             *Optional* Sets the account addr to fund and own the uniswap contracts. Defaults to 0xA58C60cc047592DE97BF1E8d2f225Fc5D959De77"
+    echo ""
+    echo "  faucet_addr      *Optional* Sets faucet address. Defaults to testnet-faucet.uksouth.azurecontainer.io"
     echo ""
     echo ""
     echo ""
@@ -32,6 +38,10 @@ uniswap_deployer_path="${build_path}/uniswap-deploy-v3"
 uniswap_sor_path="${build_path}/uniswap-smart-order-router"
 uniswap_interface_path="${build_path}/uniswap-interface"
 we_host="testnet.obscu.ro" # host.docker.internal for docker instances connecting back to localhost
+pk_string="0x8dfb8083da6275ae3e4f41e3e8a8c19d028d32c9247e24530933782f2a05035b"
+owner_addr="0xA58C60cc047592DE97BF1E8d2f225Fc5D959De77"
+faucet_addr="testnet-faucet.uksouth.azurecontainer.io"
+
 
 
 # Fetch options
@@ -41,7 +51,9 @@ do
     value=$(echo $argument | cut -f2 -d=)
 
     case "$key" in
-            --we_host)                we_host=${value} ;;
+            --we_host)                  we_host=${value} ;;
+            --pk_string)                pk_string=${value} ;;
+            --addr)                     owner_addr=${value} ;;
 
             --help)                     help_and_exit ;;
             *)
@@ -57,6 +69,14 @@ cd "${wallet_ext_path}"
 go build . && ./main -port 3001 -nodeHost "${we_host}"  &
 sleep 30s
 echo "Waiting for Wallet Extension..."
+echo ""
+
+# fund the address
+curl --request POST "http://${faucet_addr}/fund/obx" --header 'Content-Type: application/json' \
+--data-raw "{ \"address\":\"${owner_addr}\" }"
+sleep 30s
+echo "Waiting for Faucet Funding..."
+echo ""
 
 # deploy the erc20contracts
 cd "${erc20_path}"
@@ -64,26 +84,30 @@ yarn && npx hardhat compile && node scripts/deploy.js
 erc20_state=$(cat state.json)
 obscuro_constants_file+="export const erc20state =${erc20_state}\n"
 echo "${erc20_state}"
+erc20_WETH=$(jq -r  ".WETHAddress" state.json)
+echo "WETH: ${erc20_WETH}"
 sleep 30s
 echo "Waiting for erc20 contracts..."
+echo ""
 
 # deploy the uniswap contracts
 cd "${build_path}"
 git clone -b main --single-branch https://github.com/obscuronet/uniswap-deploy-v3
 cd "${uniswap_deployer_path}"
-yarn && yarn start -pk 0x8dfb8083da6275ae3e4f41e3e8a8c19d028d32c9247e24530933782f2a05035b -j http://127.0.0.1:3001/ -w9 0x890e32E4b52915819E36A3A085Bd466b3e518d18 -ncl ETH -o 0x13E23Ca74DE0206C56ebaE8D51b5622EFF1E9944
+yarn && yarn start -pk "${pk_string}" -j http://127.0.0.1:3001/ -w9 "${erc20_WETH}" -ncl ETH -o "${owner_addr}"
 deploy_state=$(cat state.json)
 obscuro_constants_file+="export const state = ${deploy_state}"
 echo ts_deploy_state
 sleep 30s
 echo "Waiting for swap contracts..."
+echo ""
 
 # build the smart-order-router
 cd "${build_path}"
 git clone -b obscuro --single-branch https://github.com/obscuronet/uniswap-smart-order-router
 cd "${uniswap_sor_path}"
 echo -e "${obscuro_constants_file}" > src/obscuro_constants_1.ts
-cat src/obscuro_constants.ts |tail -n+4>> src/obscuro_constants_1.ts
+cat src/obscuro_constants.ts | tail -n+4>> src/obscuro_constants_1.ts
 mv src/obscuro_constants_1.ts src/obscuro_constants.ts
 npm install && npm run build && npm pack
 sleep 10s
