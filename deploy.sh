@@ -74,13 +74,14 @@ echo ""
 # fund the address
 curl --request POST "http://${faucet_addr}/fund/obx" --header 'Content-Type: application/json' \
 --data-raw "{ \"address\":\"${owner_addr}\" }"
-sleep 30s
+sleep 60s
 echo "Waiting for Faucet Funding..."
 echo ""
 
 # deploy the erc20contracts
 cd "${erc20_path}"
-yarn && npx hardhat compile && node scripts/deploy.js "${pk_string}"
+yarn && npx hardhat compile
+node scripts/deploy.js "${pk_string}"
 erc20_state=$(cat state.json)
 obscuro_constants_file+="export const erc20state =${erc20_state}\n"
 echo "${erc20_state}"

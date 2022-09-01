@@ -22,7 +22,7 @@ async function main() {
   const mintedAmount = ethers.utils.parseEther("1234567891");
   let state = {}
   for (const contract of [
-      { name: "Wrapped Ether", token: "WETH"},
+    { name: "Wrapped Ether", token: "WETH"},
     { name: "Pedro Token", token: "PTK"},
     { name: "Obscuro Tokens", token: "OBX"},
     { name: "USDC", token: "USDC"},
@@ -43,6 +43,7 @@ async function main() {
 
 async function deployContract(addr, contractDetails, mintAmount) {
   const contract = await ethers.getContractFactory("ERC20Default");
+  console.log("Address: " + owner.address.toString() +" Deploying Contract: " + contractDetails.name);
   const contractDeployed = await contract.connect(addr).deploy(contractDetails.name, contractDetails.token, mintAmount);
 
   // test the contract is responding correctly
