@@ -39,16 +39,6 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-#      - name: 'Build and push image'
-#        uses: azure/docker-login@v1
-#        with:
-#          login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-#          username: ${{ secrets.REGISTRY_USERNAME }}
-#          password: ${{ secrets.REGISTRY_PASSWORD }}
-#      - run: |
-#          docker build -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/obscuronet/obscuro_testnet_obscuroscan:latest -f testnet/obscuroscan.Dockerfile  .
-#          docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/obscuronet/obscuro_testnet_obscuroscan:latest
-
       - name: 'Deploy to Azure Container Instances'
         uses: 'azure/aci-deploy@v1'
         with:
@@ -58,7 +48,7 @@ jobs:
           name: testnet-uniswap
           location: 'uksouth'
           restart-policy: 'Never'
-          command-line:  tail -f /dev/null #./deploy.sh
+          command-line:  ./deploy.sh --pk_string=${{ secrets.FAUCET_PK_STRING }} --addr=${{ secrets.FAUCET_ADDR }}
           ports: '80'
           cpu: 4
           memory: 16
