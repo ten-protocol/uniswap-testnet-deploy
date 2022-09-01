@@ -43,7 +43,7 @@ async function main() {
 
 async function deployContract(addr, contractDetails, mintAmount) {
   const contract = await ethers.getContractFactory("ERC20Default");
-  console.log("Address: " + owner.address.toString() +" Deploying Contract: " + contractDetails.name);
+  console.log("Address: " + addr.address.toString() +" Deploying Contract: " + contractDetails.name);
   const contractDeployed = await contract.connect(addr).deploy(contractDetails.name, contractDetails.token, mintAmount);
 
   // test the contract is responding correctly

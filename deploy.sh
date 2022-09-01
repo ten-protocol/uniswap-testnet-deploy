@@ -67,16 +67,16 @@ cd "${build_path}"
 git clone -b main --single-branch https://github.com/obscuronet/go-obscuro
 cd "${wallet_ext_path}"
 go build . && ./main -port 3001 -nodeHost "${we_host}"  &
-sleep 30s
 echo "Waiting for Wallet Extension..."
 echo ""
+sleep 30s
 
 # fund the address
 curl --request POST "http://${faucet_addr}/fund/obx" --header 'Content-Type: application/json' \
 --data-raw "{ \"address\":\"${owner_addr}\" }"
-sleep 60s
 echo "Waiting for Faucet Funding..."
 echo ""
+sleep 60s
 
 # deploy the erc20contracts
 cd "${erc20_path}"
@@ -87,9 +87,9 @@ obscuro_constants_file+="export const erc20state =${erc20_state}\n"
 echo "${erc20_state}"
 erc20_WETH=$(jq -r  ".WETHAddress" state.json)
 echo "WETH: ${erc20_WETH}"
-sleep 30s
 echo "Waiting for erc20 contracts..."
 echo ""
+sleep 30s
 
 # deploy the uniswap contracts
 cd "${build_path}"
@@ -99,9 +99,9 @@ yarn && yarn start -pk "${pk_string}" -j http://127.0.0.1:3001/ -w9 "${erc20_WET
 deploy_state=$(cat state.json)
 obscuro_constants_file+="export const state = ${deploy_state}"
 echo ts_deploy_state
-sleep 30s
 echo "Waiting for swap contracts..."
 echo ""
+sleep 30s
 
 # build the smart-order-router
 cd "${build_path}"
