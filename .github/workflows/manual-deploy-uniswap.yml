@@ -91,7 +91,22 @@ jobs:
                -v /opt/datadog-agent/run:/opt/datadog-agent/run:rw \
                -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
                datadog/agent:latest \
-            && sudo docker run -p 80:80 --entrypoint /uniswap/deploy.sh --pk_string=${{ secrets.FAUCET_PK_STRING }} --addr=${{ secrets.FAUCET_ADDR }} obscuronet/uniswap_testnet:latest
+            && sudo docker run -p 80:80 --entrypoint /uniswap/deploy.sh  obscuronet/uniswap_testnet:latest --pk_string=${{ secrets.FAUCET_PK_STRING }} --addr=${{ secrets.FAUCET_ADDR }}  '
+
+
+      - name: 'Remove existing backend nodes from the load balancer'
+        run: ./.github/workflows/runner-scripts/clear-loadbalancer.sh
+
+      - name: 'Create VM for Uniswap node-${{ matrix.host_id }} on Azure'
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az network nic ip-config address-pool add \
+              --address-pool Backend-Pool-Uniswap-Testnet \
+              --ip-config-name ipconfigUniswapNodeTestnet-0-${{ GITHUB.RUN_NUMBER }} \
+              --nic-name UniswapNodeTestnet-0-${{ GITHUB.RUN_NUMBER }}VMNic \
+              --resource-group Testnet \
+              --lb-name testnet-loadbalancer-uniswap
       
 
 
