@@ -39,21 +39,59 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: 'Deploy to Azure Container Instances'
-        uses: 'azure/aci-deploy@v1'
+      # This will fail some deletions due to resource dependencies ( ie. you must first delete the vm before deleting the disk)
+      - name: 'Delete deployed VMs'
+        uses: azure/CLI@v1
         with:
-          resource-group: ${{ secrets.RESOURCE_GROUP }}
-          dns-name-label: testnet-uniswap
-          image: obscuronet/uniswap_testnet:latest
-          name: testnet-uniswap
-          location: 'uksouth'
-          restart-policy: 'Never'
-          # It seems that running the command automatically causes the container to crash
-          # The pipeline of logs needs to be created to debug this
-          # For now the workaround is to ssh into the container and run the execute command
-          command-line: tail -f /dev/null
-          ports: '80'
-          cpu: 4
-          memory: 16
+          inlineScript: |
+            $(az resource list --tag testnetuniswap=true --query '[]."id"' -o tsv | xargs -n1 az resource delete --verbose -g Testnet --ids) || true
+
+      # This will clean up any lingering dependencies - might fail if there are no resources to cleanup
+      - name: 'Delete VMs dependencies'
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            $(az resource list --tag testnetuniswap=true --query '[]."id"' -o tsv | xargs -n1 az resource delete --verbose -g Testnet --ids) || true
+
+      - name: 'Create VM for Uniswap node-0 on Azure'
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az vm create -g Testnet -n "UniswapNodeTestnet-0-${{ GITHUB.RUN_NUMBER }}" \
+            --admin-username obscurouser --admin-password "${{ secrets.UNISWAP_NODE_VM_PWD }}" \
+            --public-ip-address-dns-name "UniswapNode-0-testnet-${{ GITHUB.RUN_NUMBER }}" \
+            --tags deploygroup=UniswapNodeTestnet-${{ GITHUB.RUN_NUMBER }}  testnetuniswap=true \
+            --vnet-name UniswapHostTestnet01VNET --subnet UniswapHostTestnet01Subnet \
+            --size Standard_D4as_v4 --image Canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:20.04.202206220 \
+            --public-ip-sku Basic --authentication-type password
+
+      - name: 'Open Uniswap node-${{ matrix.host_id }} ports on Azure'
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az vm open-port -g Testnet -n "UniswapNodeTestnet-0-${{ GITHUB.RUN_NUMBER }}"  --port 80
+
+      - name: 'Start Uniswap node-${{ matrix.host_id }} on Azure'
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az vm run-command invoke -g Testnet -n "UniswapNodeTestnet-0-${{ GITHUB.RUN_NUMBER }}"  \
+            --command-id RunShellScript \
+            --scripts 'mkdir -p /home/uniswap \
+            && sudo apt-get update \
+            && curl -fsSL https://get.docker.com -o get-docker.sh && sh ./get-docker.sh \
+            && docker run -d --name datadog-agent \
+               -e DD_API_KEY=${{ secrets.DD_API_KEY }} \
+               -e DD_LOGS_ENABLED=true \
+               -e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true \
+               -e DD_CONTAINER_EXCLUDE_LOGS="name:datadog-agent" \
+               -e DD_SITE="datadoghq.eu"  \
+               -v /var/run/docker.sock:/var/run/docker.sock:ro \
+               -v /proc/:/host/proc/:ro \
+               -v /opt/datadog-agent/run:/opt/datadog-agent/run:rw \
+               -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+               datadog/agent:latest \
+            && sudo docker run --entrypoint /uniswap/deploy.sh --pk_string=${{ secrets.FAUCET_PK_STRING }} --addr=${{ secrets.FAUCET_ADDR }} obscuronet/uniswap_testnet:latest
+      
 
 
