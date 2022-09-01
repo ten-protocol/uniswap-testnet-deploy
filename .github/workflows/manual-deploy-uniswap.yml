@@ -49,9 +49,9 @@ jobs:
           location: 'uksouth'
           restart-policy: 'Never'
           # It seems that running the command automatically causes the container to crash
-          # The whole pipeline of logs needs to be created to properly debug this
+          # The pipeline of logs needs to be created to debug this
           # For now the workaround is to ssh into the container and run the execute command
-          command-line: echo '/uniswap/deploy.sh --pk_string=${{ secrets.FAUCET_PK_STRING }} --addr=${{ secrets.FAUCET_ADDR }}'; tail -f /dev/null
+          command-line: tail -f /dev/null
           ports: '80'
           cpu: 4
           memory: 16
