@@ -59,7 +59,7 @@ jobs:
           inlineScript: |
             az vm create -g Testnet -n "UniswapNodeTestnet-0-${{ GITHUB.RUN_NUMBER }}" \
             --admin-username obscurouser --admin-password "${{ secrets.UNISWAP_NODE_VM_PWD }}" \
-            --public-ip-address-dns-name "UniswapNode-0-testnet-${{ GITHUB.RUN_NUMBER }}" \
+            --public-ip-address-dns-name "uniswapnode-0-testnet-${{ GITHUB.RUN_NUMBER }}" \
             --tags deploygroup=UniswapNodeTestnet-${{ GITHUB.RUN_NUMBER }}  testnetuniswap=true \
             --vnet-name UniswapHostTestnet01VNET --subnet UniswapHostTestnet01Subnet \
             --size Standard_D4as_v4 --image Canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:20.04.202206220 \
@@ -91,7 +91,7 @@ jobs:
                -v /opt/datadog-agent/run:/opt/datadog-agent/run:rw \
                -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
                datadog/agent:latest \
-            && sudo docker run --entrypoint /uniswap/deploy.sh --pk_string=${{ secrets.FAUCET_PK_STRING }} --addr=${{ secrets.FAUCET_ADDR }} obscuronet/uniswap_testnet:latest
+            && sudo docker run -p 80:80 --entrypoint /uniswap/deploy.sh --pk_string=${{ secrets.FAUCET_PK_STRING }} --addr=${{ secrets.FAUCET_ADDR }} obscuronet/uniswap_testnet:latest
       
 
 
