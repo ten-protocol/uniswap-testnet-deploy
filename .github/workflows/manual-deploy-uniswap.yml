@@ -48,7 +48,7 @@ jobs:
           name: testnet-uniswap
           location: 'uksouth'
           restart-policy: 'Never'
-          command-line: bash ./deploy.sh --pk_string=${{ secrets.FAUCET_PK_STRING }} --addr=${{ secrets.FAUCET_ADDR }}
+          command-line: ./deploy.sh --pk_string=${{ secrets.FAUCET_PK_STRING }} --addr=${{ secrets.FAUCET_ADDR }} > logs.txt
           ports: '80'
           cpu: 4
           memory: 16
