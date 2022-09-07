@@ -42,12 +42,20 @@ async function main() {
 }
 
 async function deployContract(addr, contractDetails, mintAmount) {
-  const contract = await ethers.getContractFactory("ERC20Default");
-  console.log("Address: " + addr.address.toString() +" Deploying Contract: " + contractDetails.name);
-  const contractDeployed = await contract.connect(addr).deploy(contractDetails.name, contractDetails.token, mintAmount);
+  let contractDeployed = {}
+  if (contractDetails.token == "WETH") {
+    const contract = await ethers.getContractFactory("WETH9");
+    contractDeployed = await contract.connect(addr).deploy();
+    // test the contract is responding correctly
+    expect(await contractDeployed.totalSupply()).to.equal(0);
+  } else  {
+    const contract = await ethers.getContractFactory("ERC20Default");
+    contractDeployed = await contract.connect(addr).deploy(contractDetails.name, contractDetails.token, mintAmount);
+    // test the contract is responding correctly
+    expect(await contractDeployed.totalSupply()).to.equal(mintAmount);
+  }
+  console.log("Address: " + addr.address.toString() +" Deployed Contract: " + contractDetails.name + " to: " + contractDeployed.address.toString());
 
-  // test the contract is responding correctly
-  expect(await contractDeployed.totalSupply()).to.equal(mintAmount);
   return contractDeployed.address
 }
 
