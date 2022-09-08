@@ -82,6 +82,9 @@ echo "Waiting for erc20 contracts..."
 echo ""
 sleep 30
 
+# update tokenlist
+curl https://kvdb.io/WVNLPGWE94wkw7TRv3vAFc/token_testnet_001 -H "Content-Type: application/json" -d @tokenlist.json
+
 # deploy the uniswap contracts
 cd "${build_path}"
 git clone -b main --single-branch https://github.com/obscuronet/uniswap-deploy-v3
