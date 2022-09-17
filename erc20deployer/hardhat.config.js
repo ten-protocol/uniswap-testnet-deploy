@@ -16,7 +16,7 @@ module.exports = {
   },
   networks: {
     localwallet: {
-      url: 'http://127.0.0.1:3001/',
+      url: 'http://127.0.0.1:4001/',
       gasPrice: 225,
       chainId: 777,
       accounts: [

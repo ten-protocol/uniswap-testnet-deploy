@@ -13,9 +13,9 @@ help_and_exit() {
     echo "   ex: (run locally) --we_host=host.docker.internal --faucet_addr=host.docker.internal"
     echo "      -  $(basename "${0}") "
     echo ""
-    echo "  we_host         *Optional* Sets host to which the WE connects to. Defaults to testnet"
+    echo "  we_host          *Optional* Sets host to which the WE connects to. Defaults to testnet"
     echo ""
-    echo "  pk_string       *Optional* Sets the private key to deploy contracts. Defaults to 0x8dfb8083da6275ae3e4f41e3e8a8c19d028d32c9247e24530933782f2a05035b"
+    echo "  pk_string        *Optional* Sets the private key to deploy contracts. Defaults to 0x8dfb8083da6275ae3e4f41e3e8a8c19d028d32c9247e24530933782f2a05035b"
     echo ""
     echo "  addr             *Optional* Sets the account addr to fund and own the uniswap contracts. Defaults to 0xA58C60cc047592DE97BF1E8d2f225Fc5D959De77"
     echo ""
@@ -66,7 +66,7 @@ mkdir -p "${build_path}"
 cd "${build_path}"
 git clone -b main --single-branch https://github.com/obscuronet/go-obscuro
 cd "${wallet_ext_path}"
-go build . && ./main -port 3001 -nodeHost "${we_host}"  &
+go build . && ./main -port 4001 -nodeHost "${we_host}"  &
 echo "Waiting for Wallet Extension..."
 echo ""
 sleep 30s

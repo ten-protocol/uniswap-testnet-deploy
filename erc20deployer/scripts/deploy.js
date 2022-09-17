@@ -139,7 +139,7 @@ async function deployContract(addr, contractDetails, mintAmount) {
 async function setupWalletExtention(addr) {
   let signValue = "";
   await axios
-      .post('http://127.0.0.1:3001/generateviewingkey/',
+      .post('http://127.0.0.1:4001/generateviewingkey/',
           JSON.stringify({"address": addr.address.toString()}),
           { headers: { 'Content-Type': 'application/json' } },
       )
@@ -152,7 +152,7 @@ async function setupWalletExtention(addr) {
 
   let signed_msg = await addr.signMessage("vk" + signValue);
   await axios
-      .post('http://127.0.0.1:3001/submitviewingkey/',
+      .post('http://127.0.0.1:4001/submitviewingkey/',
           JSON.stringify({"address": addr.address.toString(), "signature": signed_msg}),
           { headers: { 'Content-Type': 'application/json' } },
       )

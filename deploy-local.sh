@@ -63,7 +63,7 @@ mkdir -p "${build_path}"
 cd "${build_path}"
 git clone -b main --single-branch https://github.com/obscuronet/go-obscuro
 cd "${wallet_ext_path}"
-go build . && ./main -port 3001 -nodeHost "${we_host}"  &
+go build . && ./main -port 4001 -nodeHost "${we_host}"  &
 echo "Waiting for Wallet Extension..."
 echo ""
 sleep 30
@@ -83,13 +83,14 @@ echo ""
 sleep 30
 
 # update tokenlist
-curl https://kvdb.io/WVNLPGWE94wkw7TRv3vAFc/token_testnet_001 -H "Content-Type: application/json" -d @tokenlist.json
+echo "Updating tokenlist.."
+curl https://kvdb.io/WVNLPGWE94wkw7TRv3vAFc/token_local_testnet_001 -H "Content-Type: application/json" -d @tokenlist.json
 
 # deploy the uniswap contracts
 cd "${build_path}"
 git clone -b main --single-branch https://github.com/obscuronet/uniswap-deploy-v3
 cd "${uniswap_deployer_path}"
-yarn && yarn start -pk "${pk_string}" -j http://127.0.0.1:3001/ -w9 "${erc20_WETH}" -ncl ETH -o "${owner_addr}"
+yarn && yarn start -pk "${pk_string}" -j http://127.0.0.1:4001/ -w9 "${erc20_WETH}" -ncl ETH -o "${owner_addr}"
 deploy_state=$(cat state.json)
 obscuro_constants_file+="export const state = ${deploy_state}"
 echo ts_deploy_state
@@ -117,7 +118,8 @@ echo -e "${obscuro_constants_file}" > src/obscuro_constants_1.ts
 cat src/obscuro_constants.ts |tail -n+4>> src/obscuro_constants_1.ts
 mv src/obscuro_constants_1.ts src/obscuro_constants.ts
 cp -f "${uniswap_sor_path}/uniswap-smart-order-router-2.9.3.tgz" .
-yarn && yarn build && serve -s build -l 80 -n
+yarn && yarn build
+echo "build is complete but files are not being served - use serve -s build -l 80 -n"
 
 
 
