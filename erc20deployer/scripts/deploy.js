@@ -10,10 +10,11 @@ async function main() {
   if (process.argv.length == 2) {
     owner = await ethers.getSigners();
   } else {
+    // const provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:13010');
     owner = new ethers.Wallet( process.argv[2], ethers.provider);
   }
 
-  const walletSetup = await setupWalletExtention(owner)
+  const walletSetup = await join_and_register("http://127.0.0.1:4001", owner)
 
   if (!walletSetup) {
     return
@@ -136,30 +137,59 @@ async function deployContract(addr, contractDetails, mintAmount) {
   return contractDeployed.address
 }
 
-async function setupWalletExtention(addr) {
-  let signValue = "";
-  await axios
-      .post('http://127.0.0.1:4001/generateviewingkey/',
-          JSON.stringify({"address": addr.address.toString()}),
-          { headers: { 'Content-Type': 'application/json' } },
-      )
-      .then(res => {
-        signValue = res.data;
-      })
-      .catch(error => {
-        console.error(error);
-      });
+async function signEIP712Data(wallet, domain, types, message) {
+  try {
+    const signature = await wallet._signTypedData(domain, types, message);
+    return signature;
 
-  let signed_msg = await addr.signMessage("vk" + signValue);
-  await axios
-      .post('http://127.0.0.1:4001/submitviewingkey/',
-          JSON.stringify({"address": addr.address.toString(), "signature": signed_msg}),
-          { headers: { 'Content-Type': 'application/json' } },
-      )
-      .catch(error => {
-        console.error(error);
+  } catch (error) {
+    console.error('Error signing data:', error);
+  }
+}
+
+async function join_and_register(url, wallet) {
+  // console.log('Joining the network ' + url)
+  const jsonHeaders = { Accept: "application/json", "Content-Type": "application/json",};
+  const joinResp = await fetch(`${url}/v1/join`, {
+    method: 'GET',
+    headers: jsonHeaders,
+  });
+  let token = await joinResp.text();
+  // console.log('Joined the network with token ' + token)
+
+  // console.log('Signing message for registration ' + wallet.address)
+
+  const domain = {
+    name: "Ten",
+    version: "1.0",
+    chainId: 443,
+  }
+
+  const types = {
+    Authentication: [
+      { name: "Encryption Token", type: "address" },
+    ],
+  };
+
+  const message = {
+    "Encryption Token": "0x" + token
+  };
+
+  signature = await signEIP712Data(wallet, domain, types, message);
+
+  const requestBody = JSON.stringify({ signature: signature, address: wallet.address });
+  console.log('Request Body:', requestBody);
+  console.log("Request URL", `${url}/v1/authenticate/?token=${token}`)
+
+  console.log('Authenticating account ' + wallet.address)
+  const response = await fetch(`${url}/v1/authenticate/?token=${token}`, { // Added quotation marks around the URL
+    method: 'POST',
+    headers: jsonHeaders,
+    body: requestBody,
+  }).then(response => response.text())
+      .then((response) => {
+        console.log("Successfully setup Wallet Extension for " + wallet.address.toString())
       });
-  console.log("Successfully setup Wallet Extension for " + addr.address.toString())
   return true
 }
 

@@ -33,7 +33,7 @@ obscuro_constants_file="/* eslint-disable */ \n"
 root_path="$(cd "$(dirname "${0}")" && pwd)"
 build_path="${root_path}/build"
 erc20_path="${root_path}/erc20deployer"
-wallet_ext_path="${build_path}/go-obscuro/tools/walletextension/main"
+wallet_ext_path="${build_path}/go-ten/tools/walletextension/main"
 uniswap_deployer_path="${build_path}/uniswap-deploy-v3"
 uniswap_sor_path="${build_path}/uniswap-smart-order-router"
 uniswap_interface_path="${build_path}/uniswap-interface"
@@ -64,7 +64,7 @@ mkdir -p "${build_path}"
 
 # setup and run the wallet extension
 cd "${build_path}"
-git clone -b main --single-branch https://github.com/obscuronet/go-obscuro
+git clone -b main --single-branch https://github.com/ten-protocol/go-ten
 cd "${wallet_ext_path}"
 go build . && ./main -port 4001 -nodeHost "${we_host}"  &
 echo "Waiting for Wallet Extension..."
@@ -97,7 +97,7 @@ curl https://kvdb.io/WVNLPGWE94wkw7TRv3vAFc/token_testnet_001 -H "Content-Type: 
 
 # deploy the uniswap contracts
 cd "${build_path}"
-git clone -b main --single-branch https://github.com/obscuronet/uniswap-deploy-v3
+git clone -b main --single-branch https://github.com/ten-protocol/uniswap-deploy-v3
 cd "${uniswap_deployer_path}"
 yarn && yarn start -pk "${pk_string}" -j http://127.0.0.1:3001/ -w9 "${erc20_WETH}" -ncl ETH -o "${owner_addr}"
 deploy_state=$(cat state.json)
@@ -109,7 +109,7 @@ sleep 30s
 
 # build the smart-order-router
 cd "${build_path}"
-git clone -b obscuro --single-branch https://github.com/obscuronet/uniswap-smart-order-router
+git clone -b obscuro --single-branch https://github.com/ten-protocol/uniswap-smart-order-router
 cd "${uniswap_sor_path}"
 echo -e "${obscuro_constants_file}" > src/obscuro_constants_1.ts
 cat src/obscuro_constants.ts | tail -n+4>> src/obscuro_constants_1.ts
@@ -121,7 +121,7 @@ echo "Waiting for smart-order-router..."
 
 # build the interface
 cd "${build_path}"
-git clone -b obscuro --single-branch https://github.com/obscuronet/uniswap-interface
+git clone -b obscuro --single-branch https://github.com/ten-protocol/uniswap-interface
 cd "${uniswap_interface_path}"
 echo -e "${obscuro_constants_file}" > src/obscuro_constants_1.ts
 cat src/obscuro_constants.ts |tail -n+4>> src/obscuro_constants_1.ts
