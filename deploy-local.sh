@@ -59,14 +59,14 @@ done
 # create temp build path
 mkdir -p "${build_path}"
 
-# setup and run the wallet extension
-cd "${build_path}"
-git clone -b main --single-branch https://github.com/ten-protocol/go-ten
-cd "${wallet_ext_path}"
-go build . && ./main -port 4001 -nodeHost "${we_host}"  &
-echo "Waiting for Wallet Extension..."
-echo ""
-sleep 30
+## setup and run the wallet extension
+#cd "${build_path}"
+#git clone -b main --single-branch https://github.com/ten-protocol/go-ten
+#cd "${wallet_ext_path}"
+#go build . && ./main -port 4001 -nodeHost "${we_host}"  &
+#echo "Waiting for Wallet Extension..."
+#echo ""
+#sleep 30
 
 
 # deploy the erc20contracts
@@ -74,6 +74,7 @@ cd "${erc20_path}"
 yarn && npx hardhat compile
 node scripts/deploy.js "${pk_string}"
 erc20_state=$(cat state.json)
+authed_token=$(<authedtoken.txt)
 obscuro_constants_file+="export const erc20state =${erc20_state}\n"
 echo "${erc20_state}"
 erc20_WETH=$(jq -r  ".WETHAddress" state.json)
@@ -90,7 +91,7 @@ curl https://kvdb.io/WVNLPGWE94wkw7TRv3vAFc/token_local_testnet_001 -H "Content-
 cd "${build_path}"
 git clone -b main --single-branch https://github.com/ten-protocol/uniswap-deploy-v3
 cd "${uniswap_deployer_path}"
-yarn && yarn start -pk "${pk_string}" -j http://127.0.0.1:4001/v1/ -w9 "${erc20_WETH}" -ncl ETH -o "${owner_addr}"
+yarn && yarn start -pk "${pk_string}" -j http://127.0.0.1:4001/v1/${authed_token} -w9 "${erc20_WETH}" -ncl ETH -o "${owner_addr}"
 deploy_state=$(cat state.json)
 obscuro_constants_file+="export const state = ${deploy_state}"
 echo ts_deploy_state

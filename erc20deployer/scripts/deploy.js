@@ -4,6 +4,9 @@ const axios = require("axios");
 const {expect} = require("chai");
 const fs = require("fs");
 
+let authedURL = ""
+let authedToken = ""
+
 async function main() {
   console.log(process.argv);
   let owner = {}
@@ -20,6 +23,8 @@ async function main() {
     return
   }
 
+  owner = new ethers.Wallet( process.argv[2], new ethers.providers.JsonRpcProvider(authedURL));
+
   const mintedAmount = ethers.utils.parseEther("1234567891");
   let state = {}
   for (const contract of [
@@ -34,6 +39,7 @@ async function main() {
 
   try {
     fs.writeFileSync('./state.json', JSON.stringify(state,null,''));
+    fs.writeFileSync('./authedtoken.txt', authedToken);
     // file written successfully
   } catch (err) {
     console.error(err);
@@ -182,6 +188,9 @@ async function join_and_register(url, wallet) {
   console.log("Request URL", `${url}/v1/authenticate/?token=${token}`)
 
   console.log('Authenticating account ' + wallet.address)
+
+  authedURL = `${url}/v1/?token=${token}`
+  authedToken = token
   const response = await fetch(`${url}/v1/authenticate/?token=${token}`, { // Added quotation marks around the URL
     method: 'POST',
     headers: jsonHeaders,
