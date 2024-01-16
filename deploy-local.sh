@@ -60,13 +60,13 @@ done
 mkdir -p "${build_path}"
 
 ## setup and run the wallet extension
-#cd "${build_path}"
-#git clone -b main --single-branch https://github.com/ten-protocol/go-ten
-#cd "${wallet_ext_path}"
-#go build . && ./main -port 4001 -nodeHost "${we_host}"  &
-#echo "Waiting for Wallet Extension..."
-#echo ""
-#sleep 30
+cd "${build_path}"
+git clone -b main --single-branch https://github.com/ten-protocol/go-ten
+cd "${wallet_ext_path}"
+go build . && ./main -port 4001 -nodeHost "${we_host}"  &
+echo "Waiting for Wallet Extension..."
+echo ""
+sleep 30
 
 
 # deploy the erc20contracts
