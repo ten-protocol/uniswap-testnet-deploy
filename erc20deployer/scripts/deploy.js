@@ -1,6 +1,6 @@
 const hre = require("hardhat");
 const {ethers} = require("hardhat");
-const axios = require("axios");
+const fetch = require("node-fetch");
 const {expect} = require("chai");
 const fs = require("fs");
 
