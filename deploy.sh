@@ -40,7 +40,7 @@ uniswap_interface_path="${build_path}/uniswap-interface"
 we_host="testnet.obscu.ro" # host.docker.internal for docker instances connecting back to localhost
 pk_string="0x8dfb8083da6275ae3e4f41e3e8a8c19d028d32c9247e24530933782f2a05035b"
 owner_addr="0xA58C60cc047592DE97BF1E8d2f225Fc5D959De77"
-faucet_addr="testnet-faucet.uksouth.azurecontainer.io"
+faucet_addr="dev-testnet-faucet.uksouth.azurecontainer.io"
 
 
 
@@ -83,6 +83,7 @@ cd "${erc20_path}"
 yarn && npx hardhat compile
 node scripts/deploy.js "${pk_string}"
 erc20_state=$(cat state.json)
+authed_token=$(<authedtoken.txt)
 obscuro_constants_file+="export const erc20state =${erc20_state}\n"
 echo "${erc20_state}"
 erc20_WETH=$(jq -r  ".WETHAddress" state.json)
@@ -99,7 +100,7 @@ curl https://kvdb.io/WVNLPGWE94wkw7TRv3vAFc/token_testnet_001 -H "Content-Type: 
 cd "${build_path}"
 git clone -b main --single-branch https://github.com/ten-protocol/uniswap-deploy-v3
 cd "${uniswap_deployer_path}"
-yarn && yarn start -pk "${pk_string}" -j http://127.0.0.1:3001/ -w9 "${erc20_WETH}" -ncl ETH -o "${owner_addr}"
+yarn && yarn start -pk "${pk_string}" -j http://127.0.0.1:3001/v1/${authed_token} -w9 "${erc20_WETH}" -ncl ETH -o "${owner_addr}"
 deploy_state=$(cat state.json)
 obscuro_constants_file+="export const state = ${deploy_state}"
 echo ts_deploy_state
