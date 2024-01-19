@@ -42,7 +42,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ten-protocol/${{ github.event.inputs.testnet_type }}_uniswap_testnet:latest
+          tags: obscuronet/${{ github.event.inputs.testnet_type }}_uniswap_testnet:latest
           file: ./Dockerfile
 
       - name: 'Login via Azure CLI'
@@ -103,7 +103,7 @@ jobs:
                -v /opt/datadog-agent/run:/opt/datadog-agent/run:rw \
                -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
                datadog/agent:latest \
-            && sudo docker run -d -p 80:80 --entrypoint /uniswap/deploy.sh ten-protocol/${{ github.event.inputs.testnet_type }}_uniswap_testnet:latest --pk_string=${{ secrets.FAUCET_PK_STRING }} --addr=${{ secrets.FAUCET_ADDR }} --we_host=${{ github.event.inputs.testnet_type }}.obscu.ro '
+            && sudo docker run -d -p 80:80 --entrypoint /uniswap/deploy.sh obscuronet/${{ github.event.inputs.testnet_type }}_uniswap_testnet:latest --pk_string=${{ secrets.FAUCET_PK_STRING }} --addr=${{ secrets.FAUCET_ADDR }} --we_host=${{ github.event.inputs.testnet_type }}.obscu.ro '
 
 
 #      - name: 'Remove existing backend nodes from the load balancer'
