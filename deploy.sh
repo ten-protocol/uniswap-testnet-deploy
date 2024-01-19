@@ -72,7 +72,7 @@ echo ""
 sleep 30s
 
 # fund the address
-curl --request POST "http://${faucet_addr}/fund/obx" --header 'Content-Type: application/json' \
+curl --request POST "http://${faucet_addr}/fund/eth" --header 'Content-Type: application/json' \
 --data-raw "{ \"address\":\"${owner_addr}\" }"
 echo "Waiting for Faucet Funding..."
 echo ""
@@ -100,7 +100,7 @@ curl https://kvdb.io/WVNLPGWE94wkw7TRv3vAFc/token_testnet_001 -H "Content-Type: 
 cd "${build_path}"
 git clone -b main --single-branch https://github.com/ten-protocol/uniswap-deploy-v3
 cd "${uniswap_deployer_path}"
-yarn && yarn start -pk "${pk_string}" -j http://127.0.0.1:3001/v1/${authed_token} -w9 "${erc20_WETH}" -ncl ETH -o "${owner_addr}"
+yarn && yarn start -pk "${pk_string}" -j http://127.0.0.1:4001/v1/${authed_token} -w9 "${erc20_WETH}" -ncl ETH -o "${owner_addr}"
 deploy_state=$(cat state.json)
 obscuro_constants_file+="export const state = ${deploy_state}"
 echo ts_deploy_state
