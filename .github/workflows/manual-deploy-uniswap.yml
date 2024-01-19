@@ -7,7 +7,8 @@
 # Exposes the following addresses: (only accessible internally)
 #  testnet-uniswap.uksouth.azurecontainer.io
 
-name: '[M] Deploy Uniswap ( ${{ github.event.inputs.testnet_type }} )'
+name: '[M] Deploy Uniswap'
+run-name: '[M] Deploy Uniswap ( ${{ github.event.inputs.testnet_type }} )'
 
 on:
   workflow_dispatch:
@@ -118,6 +119,6 @@ jobs:
 #              --nic-name ${{ github.event.inputs.testnet_type }}-Uniswap-0-${{ GITHUB.RUN_NUMBER }}VMNic \
 #              --resource-group Testnet \
 #              --lb-name ${{ github.event.inputs.testnet_type }}-loadbalancer-uniswap
-#      
+#
 
 
