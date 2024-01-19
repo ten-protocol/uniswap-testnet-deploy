@@ -7,10 +7,20 @@
 # Exposes the following addresses: (only accessible internally)
 #  testnet-uniswap.uksouth.azurecontainer.io
 
-name: '[M] Deploy Uniswap'
+name: '[M] Deploy Uniswap ( ${{ github.event.inputs.testnet_type }} )'
 
 on:
   workflow_dispatch:
+    inputs:
+      testnet_type:
+        description: 'Testnet Type'
+        required: true
+        default: 'dev-testnet'
+        type: choice
+        options:
+          - 'dev-testnet'
+          - 'uat-testnet'
+          - 'sepolia-testnet'
 
 jobs:
   build-and-deploy:
@@ -31,7 +41,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: ten-protocol/uniswap_testnet:latest
+          tags: ten-protocol/${{ github.event.inputs.testnet_type }}_uniswap_testnet:latest
           file: ./Dockerfile
 
       - name: 'Login via Azure CLI'
@@ -44,24 +54,25 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            $(az resource list --tag testnetuniswap=true --query '[]."id"' -o tsv | xargs -n1 az resource delete --verbose -g Testnet --ids) || true
+            $(az resource list --tag ${{ github.event.inputs.testnet_type }}_uniswap_resources=true --query '[]."id"' -o tsv | xargs -n1 az resource delete --verbose -g Testnet --ids) || true
 
       # This will clean up any lingering dependencies - might fail if there are no resources to cleanup
       - name: 'Delete VMs dependencies'
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            $(az resource list --tag testnetuniswap=true --query '[]."id"' -o tsv | xargs -n1 az resource delete --verbose -g Testnet --ids) || true
+            $(az resource list --tag ${{ github.event.inputs.testnet_type }}_uniswap_resources=true --query '[]."id"' -o tsv | xargs -n1 az resource delete --verbose -g Testnet --ids) || true
+    
 
       - name: 'Create VM for Uniswap node-0 on Azure'
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            az vm create -g Testnet -n "UniswapNodeTestnet-0-${{ GITHUB.RUN_NUMBER }}" \
+            az vm create -g Testnet -n "${{ github.event.inputs.testnet_type }}-uniswap-0-${{ GITHUB.RUN_NUMBER }}" \
             --admin-username obscurouser --admin-password "${{ secrets.UNISWAP_NODE_VM_PWD }}" \
-            --public-ip-address-dns-name "uniswapnode-0-testnet-${{ GITHUB.RUN_NUMBER }}" \
-            --tags deploygroup=UniswapNodeTestnet-${{ GITHUB.RUN_NUMBER }}  testnetuniswap=true \
-            --vnet-name UniswapHostTestnet01VNET --subnet UniswapHostTestnet01Subnet \
+            --public-ip-address-dns-name "${{ github.event.inputs.testnet_type }}-uniswap-0-${{ GITHUB.RUN_NUMBER }}" \
+            --tags deploygroup=${{ github.event.inputs.testnet_type }}-uniswap-${{ GITHUB.RUN_NUMBER }} ${{ github.event.inputs.testnet_type }}_uniswap_resources=true \
+            --vnet-name ${{ github.event.inputs.testnet_type }}-uniswap01VNET --subnet ${{ github.event.inputs.testnet_type }}-uniswap01Subnet \
             --size Standard_D4as_v4 --image Canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:20.04.202206220 \
             --public-ip-sku Basic --authentication-type password
 
@@ -69,13 +80,13 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            az vm open-port -g Testnet -n "UniswapNodeTestnet-0-${{ GITHUB.RUN_NUMBER }}"  --port 80
+            az vm open-port -g Testnet -n "${{ github.event.inputs.testnet_type }}-uniswap-0-${{ GITHUB.RUN_NUMBER }}"  --port 80
 
       - name: 'Start Uniswap node-${{ matrix.host_id }} on Azure'
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            az vm run-command invoke -g Testnet -n "UniswapNodeTestnet-0-${{ GITHUB.RUN_NUMBER }}"  \
+            az vm run-command invoke -g Testnet -n "${{ github.event.inputs.testnet_type }}-uniswap-0-${{ GITHUB.RUN_NUMBER }}"  \
             --command-id RunShellScript \
             --scripts 'mkdir -p /home/uniswap \
             && sudo apt-get update \
@@ -91,22 +102,22 @@ jobs:
                -v /opt/datadog-agent/run:/opt/datadog-agent/run:rw \
                -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
                datadog/agent:latest \
-            && sudo docker run -d -p 80:80 --entrypoint /uniswap/deploy.sh  ten-protocol/uniswap_testnet:latest --pk_string=${{ secrets.FAUCET_PK_STRING }} --addr=${{ secrets.FAUCET_ADDR }}  '
+            && sudo docker run -d -p 80:80 --entrypoint /uniswap/deploy.sh ten-protocol/${{ github.event.inputs.testnet_type }}_uniswap_testnet:latest --pk_string=${{ secrets.FAUCET_PK_STRING }} --addr=${{ secrets.FAUCET_ADDR }} --we_host=${{ github.event.inputs.testnet_type }}.obscu.ro '
 
 
-      - name: 'Remove existing backend nodes from the load balancer'
-        run: ./.github/workflows/runner-scripts/clear-loadbalancer.sh
+#      - name: 'Remove existing backend nodes from the load balancer'
+#        run: ./.github/workflows/runner-scripts/clear-loadbalancer.sh
 
-      - name: 'Create VM for Uniswap node-${{ matrix.host_id }} on Azure'
-        uses: azure/CLI@v1
-        with:
-          inlineScript: |
-            az network nic ip-config address-pool add \
-              --address-pool Backend-Pool-Uniswap-Testnet \
-              --ip-config-name ipconfigUniswapNodeTestnet-0-${{ GITHUB.RUN_NUMBER }} \
-              --nic-name UniswapNodeTestnet-0-${{ GITHUB.RUN_NUMBER }}VMNic \
-              --resource-group Testnet \
-              --lb-name testnet-loadbalancer-uniswap
-      
+#      - name: 'Create VM for Uniswap node-${{ matrix.host_id }} on Azure'
+#        uses: azure/CLI@v1
+#        with:
+#          inlineScript: |
+#            az network nic ip-config address-pool add \
+#              --address-pool Backend-Pool-${{ github.event.inputs.testnet_type }}-Uniswap \
+#              --ip-config-name ipconfig-${{ github.event.inputs.testnet_type }}-Uniswap-0-${{ GITHUB.RUN_NUMBER }} \
+#              --nic-name ${{ github.event.inputs.testnet_type }}-Uniswap-0-${{ GITHUB.RUN_NUMBER }}VMNic \
+#              --resource-group Testnet \
+#              --lb-name ${{ github.event.inputs.testnet_type }}-loadbalancer-uniswap
+#      
 
 
