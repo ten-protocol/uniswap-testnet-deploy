@@ -13,7 +13,6 @@ async function main() {
   if (process.argv.length == 2) {
     owner = await ethers.getSigners();
   } else {
-    // const provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:13010');
     owner = new ethers.Wallet( process.argv[2], ethers.provider);
   }
 
