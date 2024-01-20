@@ -129,7 +129,7 @@ echo -e "${obscuro_constants_file}" > src/obscuro_constants_1.ts
 cat src/obscuro_constants.ts |tail -n+4>> src/obscuro_constants_1.ts
 mv src/obscuro_constants_1.ts src/obscuro_constants.ts
 cp -f "${uniswap_sor_path}/uniswap-smart-order-router-2.9.3.tgz" .
-yarn && yarn build && serve -s build -l 80 -n
+yarn install --skip-integrity-check && yarn build && serve -s build -l 80 -n
 
 
 
