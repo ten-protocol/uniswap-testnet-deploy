@@ -107,7 +107,7 @@ jobs:
             --entrypoint /uniswap/deploy.sh obscuronet/${{ github.event.inputs.testnet_type }}_uniswap_testnet:latest \
             --pk_string=${{ secrets.FAUCET_PK_STRING }} --addr=${{ secrets.FAUCET_ADDR }} \
             --faucet_addr=${{ github.event.inputs.testnet_type }}-faucet.uksouth.azurecontainer.io \
-            --we_host=${{ github.event.inputs.testnet_type }}.obscu.ro '
+            --we_host=erpc.${{ github.event.inputs.testnet_type }}.obscu.ro '
 
 
 #      - name: 'Remove existing backend nodes from the load balancer'
