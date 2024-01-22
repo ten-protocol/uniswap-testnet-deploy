@@ -81,7 +81,7 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            az vm open-port -g Testnet -n "${{ github.event.inputs.testnet_type }}-uniswap-0-${{ GITHUB.RUN_NUMBER }}"  --port 80
+            az vm open-port -g Testnet -n "${{ github.event.inputs.testnet_type }}-uniswap-0-${{ GITHUB.RUN_NUMBER }}" --port 80
 
       - name: 'Start Uniswap node-${{ matrix.host_id }} on Azure'
         uses: azure/CLI@v1
