@@ -76,7 +76,7 @@ function writeTokenList(addresses) {
     "timestamp": "2020-06-12T00:00:00+00:00",
     "tokens": [
       {
-        "chainId": 777,
+        "chainId": 443,
         "address": addresses["USDCAddress"],
         "symbol": "USDC",
         "name": "USD Coin",
@@ -87,10 +87,10 @@ function writeTokenList(addresses) {
         ]
       },
       {
-        "chainId": 777,
+        "chainId": 443,
         "address": addresses["WETHAddress"],
-        "symbol": "WOBX",
-        "name": "Wrapped Obx",
+        "symbol": "WsepETH",
+        "name": "Wrapped sepETH",
         "decimals": 18,
         "logoURI": "ipfs://QmXfzKRvjZz3u5JRgC4v5mGVbm9ahrUiB4DgzHBsnWbTMM",
         "tags": [
@@ -98,7 +98,7 @@ function writeTokenList(addresses) {
         ]
       },
       {
-        "chainId": 777,
+        "chainId": 443,
         "address": addresses["PTKAddress"],
         "symbol": "PTK",
         "name": "Pedro Token",
