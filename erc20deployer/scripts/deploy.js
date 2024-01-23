@@ -52,7 +52,7 @@ async function main() {
 function writeTokenList(addresses) {
   tokenList = {
     "name": "Obscuro Token List",
-    "logoURI": "https://pbs.twimg.com/profile_images/1460984508090658824/wGnI8m6s_400x400.jpg",
+    "logoURI": "https://pbs.twimg.com/profile_images/1747242565336702976/ifJOqy13_400x400.jpg",
     "keywords": [
       "audited",
       "verified",

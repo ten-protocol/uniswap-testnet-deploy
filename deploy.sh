@@ -21,6 +21,8 @@ help_and_exit() {
     echo ""
     echo "  faucet_addr      *Optional* Sets faucet address. Defaults to testnet-faucet.uksouth.azurecontainer.io"
     echo ""
+    echo "  testnet_name     *Optional* Sets testnet for token addresses. Defaults to dev-testnet"
+    echo ""
     echo ""
     echo ""
     exit 1  # Exit with error explicitly
@@ -41,6 +43,7 @@ we_host="dev-testnet.obscu.ro" # host.docker.internal for docker instances conne
 pk_string="0x8dfb8083da6275ae3e4f41e3e8a8c19d028d32c9247e24530933782f2a05035b"
 owner_addr="0xA58C60cc047592DE97BF1E8d2f225Fc5D959De77"
 faucet_addr="dev-testnet-faucet.uksouth.azurecontainer.io"
+testnet_name="dev-testnet"
 
 
 
@@ -55,6 +58,7 @@ do
             --pk_string)                pk_string=${value} ;;
             --addr)                     owner_addr=${value} ;;
             --faucet_addr)              faucet_addr=${value} ;;
+            --testnet_name)             testnet_name=${value} ;;
 
             --help)                     help_and_exit ;;
             *)
@@ -95,7 +99,7 @@ sleep 30s
 
 # update tokenlist
 echo "Updating tokenlist.."
-curl https://kvdb.io/WVNLPGWE94wkw7TRv3vAFc/token_testnet_001 -H "Content-Type: application/json" -d @tokenlist.json
+curl https://kvdb.io/WVNLPGWE94wkw7TRv3vAFc/token_${testnet_name}_001 -H "Content-Type: application/json" -d @tokenlist.json
 
 # deploy the uniswap contracts
 cd "${build_path}"
@@ -130,7 +134,7 @@ cat src/obscuro_constants.ts |tail -n+4>> src/obscuro_constants_1.ts
 mv src/obscuro_constants_1.ts src/obscuro_constants.ts
 cp -f "${uniswap_sor_path}/uniswap-smart-order-router-2.9.3.tgz" .
 # Double install to sort out the yarn.lock missmatch
-yarn install --update-checksums || true \
+TESTNET_NAME=${testnet_name} yarn install --update-checksums || true \
   && yarn install --update-checksums && yarn build \
   && serve -s build -l 80 -n
 
