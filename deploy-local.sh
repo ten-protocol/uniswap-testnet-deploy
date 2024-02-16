@@ -57,12 +57,15 @@ do
     esac
 done
 # create temp build path
+rm -rf "${build_path}"
 mkdir -p "${build_path}"
 
 ## setup and run the wallet extension
 cd "${build_path}"
 git clone -b main --single-branch https://github.com/ten-protocol/go-ten
 cd "${wallet_ext_path}"
+echo "terminating removing any existing wallet extension..."
+lsof -ti:4001 | xargs kill -9
 go build . && ./main -port 4001 -nodeHost "${we_host}"  &
 echo "Waiting for Wallet Extension..."
 echo ""
@@ -119,7 +122,8 @@ echo -e "${obscuro_constants_file}" > src/obscuro_constants_1.ts
 cat src/obscuro_constants.ts |tail -n+4>> src/obscuro_constants_1.ts
 mv src/obscuro_constants_1.ts src/obscuro_constants.ts
 cp -f "${uniswap_sor_path}/uniswap-smart-order-router-2.9.3.tgz" .
-TESTNET_NAME=local yarn install --update-checksums  && yarn build
+export TESTNET_NAME=local_testnet
+yarn install --update-checksums  && yarn build
 echo "build is complete but files are not being served - use serve -s build -l 80 -n"
 
 
