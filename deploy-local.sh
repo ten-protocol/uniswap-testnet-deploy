@@ -15,9 +15,9 @@ help_and_exit() {
     echo ""
     echo "  we_host         *Optional* Sets host to which the WE connects to. Defaults to 127.0.0.1"
     echo ""
-    echo "  pk_string       *Optional* Sets the private key to deploy contracts. Defaults to 0x8dfb8083da6275ae3e4f41e3e8a8c19d028d32c9247e24530933782f2a05035b"
+    echo "  pk_string       *Optional* Sets the private key to deploy contracts."
     echo ""
-    echo "  addr             *Optional* Sets the account addr to fund and own the uniswap contracts. Defaults to 0xA58C60cc047592DE97BF1E8d2f225Fc5D959De77"
+    echo "  addr             *Optional* Sets the account addr to fund and own the uniswap contracts."
     echo ""
     echo ""
     echo ""
@@ -35,13 +35,14 @@ wallet_ext_path="${build_path}/go-ten/tools/walletextension/main"
 uniswap_deployer_path="${build_path}/uniswap-deploy-v3"
 uniswap_sor_path="${build_path}/uniswap-smart-order-router"
 uniswap_interface_path="${build_path}/uniswap-interface"
-we_host="127.0.0.1" # host.docker.internal for docker instances connecting back to localhost
-pk_string="0x8dfb8083da6275ae3e4f41e3e8a8c19d028d32c9247e24530933782f2a05035b"
-owner_addr="0xA58C60cc047592DE97BF1E8d2f225Fc5D959De77"
 
+# Load environment variables (pk_string and owner_addr) from .env file
+if [ -f .env ]
+then
+  export $(cat .env | sed 's/#.*//g' | xargs)
+fi
 
-
-# Fetch options
+# Fetch options (options will override .env file)
 for argument in "$@"
 do
     key=$(echo $argument | cut -f1 -d=)
@@ -56,6 +57,14 @@ do
             *)
     esac
 done
+
+# Check that required options we_host, pk_string and owner_addr are set
+if [ -z "${we_host:-}" ] || [ -z "${pk_string:-}" ] || [ -z "${owner_addr:-}" ]
+then
+    echo "Missing required options, make sure to have a .env file or provide options"
+    help_and_exit
+fi
+
 # create temp build path
 rm -rf "${build_path}"
 mkdir -p "${build_path}"

@@ -1,4 +1,3 @@
-const hre = require("hardhat");
 const {ethers} = require("hardhat");
 const fetch = require("node-fetch");
 const {expect} = require("chai");
@@ -10,6 +9,8 @@ let authedToken = ""
 async function main() {
   console.log(process.argv);
   let owner = {}
+
+  // checks hardhat.config.js (.env) for the network setup or uses the arguments
   if (process.argv.length == 2) {
     owner = await ethers.getSigners();
   } else {

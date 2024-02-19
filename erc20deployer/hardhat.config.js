@@ -1,5 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("@nomiclabs/hardhat-waffle");
+require('dotenv').config({ path: '../.env' });
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -20,7 +21,7 @@ module.exports = {
       gasPrice: 20000,
       chainId: 443,
       accounts: [
-        "0x8dfb8083da6275ae3e4f41e3e8a8c19d028d32c9247e24530933782f2a05035b"
+        `${process.env.pk_string}`
       ]
     },
   }
