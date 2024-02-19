@@ -65,7 +65,7 @@ cd "${build_path}"
 git clone -b main --single-branch https://github.com/ten-protocol/go-ten
 cd "${wallet_ext_path}"
 echo "terminating removing any existing wallet extension..."
-lsof -ti:4001 | xargs kill -9
+lsof -ti:4001 | xargs kill -9 &
 go build . && ./main -port 4001 -nodeHost "${we_host}"  &
 echo "Waiting for Wallet Extension..."
 echo ""
