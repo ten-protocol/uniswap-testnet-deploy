@@ -63,7 +63,7 @@ jobs:
         with:
           inlineScript: |
             $(az resource list --tag ${{ github.event.inputs.testnet_type }}_uniswap_resources=true --query '[]."id"' -o tsv | xargs -n1 az resource delete --verbose -g Testnet --ids) || true
-    
+
 
       - name: 'Create VM for Uniswap node-0 on Azure'
         uses: azure/CLI@v1
@@ -106,9 +106,9 @@ jobs:
             && sudo docker run -d -p 80:80 \
             --entrypoint /uniswap/deploy.sh obscuronet/${{ github.event.inputs.testnet_type }}_uniswap_testnet:latest \
             --testnet_name=${{ github.event.inputs.testnet_type }} \
-            --pk_string=${{ secrets.FAUCET_PK_STRING }} --addr=${{ secrets.FAUCET_ADDR }} \
+            --pk_string=${{ secrets.UNISWAP_PK_STRING }} --addr=${{ secrets.UNISWAP_ADDR }} \
             --faucet_addr=${{ github.event.inputs.testnet_type }}-faucet.uksouth.azurecontainer.io \
-            --we_host=erpc.${{ github.event.inputs.testnet_type }}.obscu.ro '
+            --we_host=erpc.${{ github.event.inputs.testnet_type }}.ten.xyz '
 
 
 #      - name: 'Remove existing backend nodes from the load balancer'
